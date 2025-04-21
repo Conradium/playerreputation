@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+    id("io.github.goooler.shadow") version "8.1.8"
+    // Optional: If you want cleaner build folders (places output in build/libs)
+    // id 'base'
+}
+
+group = 'com.lei.reputation' // <-- IMPORTANT: Change this to your chosen package root (e.g., me.yourname.reputation)
+version = '1.4.0'
+
+// Set the Java version required by Minecraft 1.21.x
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21) // Or 21 if your server/setup uses JDK 21
+}
+
+repositories {
+    mavenCentral() // Standard Java library repository
+    // Repository for Paper API (Recommended for modern plugins)
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    // Repository for Spigot API (If you prefer/need Spigot specifically)
+    // maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+}
+
+dependencies {
+    // The Paper API. 'compileOnly' means it's needed for coding but provided by the server at runtime.
+    // Replace '1.21.4-R0.1-SNAPSHOT' with the specific version you are targeting if different.
+    compileOnly "io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT"
+
+    // Or, if using Spigot API instead of Paper:
+    // compileOnly "org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT"
+
+    // bStats Metrics - needed for the metrics code in the plugin
+    implementation "org.bstats:bstats-bukkit:3.0.2" // Use implementation as it's bundled WITH your plugin
+    compileOnly 'net.luckperms:api:5.4'
+}
+
+// Optional: Configure the JAR building process (useful for including bStats)
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Ensure consistent encoding
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    // Relocate bStats to avoid conflicts with other plugins using it
+    // This changes org.bstats.* to com.lei.reputation.lib.bstats.* inside your JAR
+    relocate 'org.bstats', "${project.group}.lib.bstats" // Uses your group ID dynamically
+
+    // IMPORTANT: Set the classifier to empty string.
+    // This makes the shadowed JAR the main artifact (e.g., playerreputation-1.0.0.jar)
+    // instead of playerreputation-1.0.0-all.jar or playerreputation-1.0.0-shadow.jar
+    archiveClassifier.set('') // Use .set('') for newer Gradle versions if needed
+
+    // Optional: You can explicitly set the output JAR name if desired
+    // archiveBaseName = project.name
+    // archiveVersion = project.version
+}
+
+build {
+    dependsOn shadowJar
+}
+

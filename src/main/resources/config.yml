@@ -1,0 +1,21 @@
+# PlayerReputation Configuration
+
+reputation:
+  # Kills needed to reach certain reputation levels
+  thresholds:
+    orange: 1   # Minimum kills to become Orange (1 or more)
+    red: 5      # Minimum kills to become Red (5 or more)
+
+  # Prefixes displayed above the player's head (uses standard Minecraft color codes with '&')
+  # You can use different symbols like ▲, ▼, ♦, etc.
+  prefixes:
+    green: "&a» "   # For 0 kills
+    orange: "&6» "  # For kills >= orange threshold but < red threshold
+    red: "&c» "     # For kills >= red threshold
+
+
+reveal-name:
+  display-time: 3
+  format: "&6{PLAYER_NAME}"
+
+  # Player kill data is stored separately in playerdata.yml
